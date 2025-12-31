@@ -5,8 +5,8 @@ from .season import Season
 from .training import Training
 
 __all__ = [
-    'Activity',
-    'Competition',
-    'Season',
-    'Training',
+    "Activity",
+    "Competition",
+    "Season",
+    "Training",
 ]

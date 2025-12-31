@@ -1,5 +1,6 @@
 # core/models/managers.py
 """Custom model managers for the core app."""
+
 from django.db import models
 
 
