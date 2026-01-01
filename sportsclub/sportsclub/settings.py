@@ -14,12 +14,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Read .env file from project root (one level up from sportsclub/)
 environ.Env.read_env(BASE_DIR.parent / ".env")
 
-# Quick-start development settings - unsuitable for production
+# Default values are provided for everything that is needed at build time
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-SECRET_KEY = env("SECRET_KEY")
-DEBUG = env("DEBUG")
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+SECRET_KEY = env("SECRET_KEY", default="insecure-build-time-key")
+DEBUG = env("DEBUG", default=False)
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 ADMINS = env.list("ADMINS", default=[])
 MANAGERS = env.list("MANAGERS", default=[])
 SERVER_EMAIL = env("SERVER_EMAIL", default="root@localhost")
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -84,9 +85,9 @@ WSGI_APPLICATION = "sportsclub.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("POSTGRES_DB"),
-        "USER": env("POSTGRES_USER"),
-        "PASSWORD": env("POSTGRES_PASSWORD"),
+        "NAME": env("POSTGRES_DB", default="sportsclub"),
+        "USER": env("POSTGRES_USER", default="sportsclub"),
+        "PASSWORD": env("POSTGRES_PASSWORD", default="sportsclub"),
         "HOST": env("POSTGRES_HOST", default="localhost"),
         "PORT": env("POSTGRES_PORT", default="5432"),
     }
@@ -116,18 +117,26 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# No need for caching support via `CompressedManifestStaticFilesStorage`
+# since it is only for the API docs and some icons.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

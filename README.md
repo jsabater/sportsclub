@@ -312,6 +312,7 @@ django-ninja
 django-ratelimit
 pydantic[email]
 psycopg[binary,pool]
+whitenoise
 EOF
 
 # Install the requirements
@@ -337,6 +338,8 @@ sportsclub/
     ├── urls.py
     └── wsgi.py
 ```
+
+> We will be serving static contents using [Whitenoise](https://whitenoise.readthedocs.io/en/stable/django.html), a Python library designed to simplify static file serving for WSGI-compatible web applications.
 
 ## Settings
 
@@ -413,6 +416,7 @@ In the same `sportsclub/settings.py` file, configure now the middlewares:
 ```python
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -465,6 +469,15 @@ Note that the default time zone is UTC, which is just fine:
 
 ```python
 TIME_ZONE = 'UTC'
+```
+
+Finally, the static files directives when using Whitenoise:
+
+```python
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 ```
 
 > We will use the local disk for media and static files for the time being.

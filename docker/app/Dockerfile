@@ -22,8 +22,8 @@ RUN pip install --no-cache-dir uvicorn
 # Copy project
 COPY sportsclub/ .
 
-# Collect static files (if needed)
-# RUN python manage.py collectstatic --noinput
+# Collect static files (needed when serving through a reverse proxy)
+RUN python manage.py collectstatic --noinput
 
 # Run uvicorn
 CMD ["uvicorn", "sportsclub.asgi:application", "--host", "0.0.0.0", "--port", "8080"]
