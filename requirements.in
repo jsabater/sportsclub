@@ -3,7 +3,7 @@ asgiref==3.11.0
 Django==6.0
 django-cors-headers==4.9.0
 django-environ==0.12.0
-django-json-widget==2.1.0
+django-json-widget==2.1.1
 django-nanoid-field==0.1.4
 django-ninja==1.5.1
 django-ratelimit==4.1.0
