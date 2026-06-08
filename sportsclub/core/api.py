@@ -16,8 +16,6 @@ from .schemas import (
 router = Router()
 
 
-# XXX: Rate limit example to be expanded in the future
-# @ratelimit(key="ip", rate="100/h")
 @router.get("/addresses", response=list[AddressListOut], tags=["Addresses"])
 def list_addresses(request):
     """
