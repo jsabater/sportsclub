@@ -198,14 +198,32 @@ git clone https://github.com/sportsclub/sportsclub.git
 Taking the `.env.example` file as reference, create a `.env` file in the project root and adapt it to your needs. This is the standard convention and will serve as a single source of truth throughout our project (Django, Docker Compose, CI/CD, shell scripts, etc.):
 
 ```bash
+cd ~/Projects/sportsclub
 cp .env.example .env
 ```
 
 Next, [install Docker](https://docs.docker.com/engine/install/), if you have not already, and use Compose to bring up the environment:
 
 ```bash
-cd sportsclub
 docker compose up --build --detach
+```
+
+Now initialise the database:
+
+```bash
+make init-db
+```
+
+And load the test data (fixtures):
+
+```bash
+make load-fixtures
+```
+
+Finally, create a superuser:
+
+```bash
+make create-superuser
 ```
 
 ## Development environment
@@ -243,77 +261,41 @@ Now install the dependencies:
 pip install --requirement ~/Projects/sportsclub/requirements.txt
 ```
 
-> This project does not use `uv` on purpose, so students can learn about `.lock` and `.in` files.
+> This project does not use `uv` on purpose, so students can research about `.lock` and `.in` files, then implement a solution.
 
 Taking the `.env.example` file as reference, create a `.env` file in the project root and adapt it to your needs. This is the standard convention and will serve as a single source of truth throughout our project (Django, Docker Compose, CI/CD, shell scripts, etc.):
 
 ```bash
+cd ~/Projects/sportsclub
 cp .env.example .env
 ```
 
-### Migrations
-
-Once all model classes have been defined, we are ready to generate the migrations files and apply them:
+Now initialise the database:
 
 ```bash
-cd ~/Projects/sportsclub/sportsclub
-python manage.py makemigrations core
-python manage.py makemigrations inventory
-python manage.py makemigrations people
-python manage.py makemigrations scheduling
-python manage.py migrate
+make init-db
 ```
 
-Django analyzes all apps, determines dependencies, and creates migrations in the correct order. For most cases, this works perfectly. Should we have circular or complex dependencies between apps, Django might get confused about the order. Creating them explicitly ensures the dependency chain is correct.
-
-> Migration files are generated for each app separately.
-
-While we are in the development environment, if we need to delete the data in the database, we can do so using the following command:
+And load the test data (fixtures):
 
 ```bash
-cd ~/Projects/sportsclub/sportsclub
-python manage.py flush --no-input
+make load-fixtures
 ```
 
-> The command `manage.py flush` keeps the schema intact, but it reloads the initial data fixtures, if any.
-
-Then migrate:
+Finally, create a superuser:
 
 ```bash
-cd ~/Projects/sportsclub/sportsclub
-python manage.py migrate
+make create-superuser
 ```
 
-Also while in development, if we want or need to delete all the migration files, e.g., we have made a lot of small modifications to the model and we want a clean slate, we can delete the migration files using the following commands:
+Whenever we need to reset the database, we can do so using the following command:
 
 ```bash
-cd ~/Projects/sportsclub/sportsclub
-find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
-find . -path "*/migrations/*.pyc" -delete
+cd ~/Projects/sportsclub
+make reset-all
 ```
 
-We can add a `~/Projects/sportsclub/Makefile` target for convenience:
-
-```makefile
-# Makefile
-reset-migrations:
-	find sportsclub/ -path "*/migrations/*.py" -not -name "__init__.py" -delete
-	find sportsclub/ -path "*/migrations/*.pyc" -delete
-```
-
-Then run it with `make reset-migrations`. Using a `Makefile` in a project is common practice, as it helps us automate ways to solve practical problems.
-
-## Superuser
-
-We need to create a superuser, which will have all permissions and which we will use to access the admin panel for the first time:
-
-```bash
-python manage.py createsuperuser --username admin --email root@localhost
-```
-
-## Development server
-
-To use Django's built-in development server, use this command:
+We can now start Django's built-in development server:
 
 ```bash
 cd ~/Projects/sportsclub/sportsclub
@@ -322,7 +304,16 @@ python manage.py runserver
 
 And load the home page at http://127.0.0.1:8000/.
 
-### Running the tests
+
+## Test data
+
+Django has a native mechanism to load test data, a.k.a., fixtures, into the database. Files in JSON or YAML formats with test data can be created inside the `fixtures/` subdirectory of each Django app, and loaded via `python manage.py loaddata`. Advantages of using this system versus loading the data via SQL into the database are:
+
+1. It is database-agnostic.
+2. It respects Django model validation.
+3. It is version-controlled.
+
+### Tests
 
 To run the tests for a specific Django app, use this command::
 
@@ -344,18 +335,6 @@ But we usually want to run all the tests at once. We can do that with a single c
 cd ~/Projects/sportsclub/sportsclub
 python manage.py test
 ```
-
-
-## Fixtures
-
-Django has a native mechanism to load test data, a.k.a., fixtures, into the database. We can create JSON/YAML files with test data and load them via `python manage.py loaddata`. Advantages of using this system versus loading the data via SQL into the database are:
-
-1. It is database-agnostic.
-2. It respects Django model validation.
-3. It is version-controlled.
-
-Fixtures are available as a set of files inside the `fixtures/` subdirectory of each Django app.
-
 
 ## Github Actions
 
