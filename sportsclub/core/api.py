@@ -1,4 +1,5 @@
 # core/api.py
+from django.db import DatabaseError, connection
 from django.shortcuts import get_object_or_404
 from ninja import Router
 
@@ -10,10 +11,44 @@ from .schemas import (
     AddressOut,
     AddressPatch,
     ErrorResponse,
+    HealthResponse,
+    PingResponse,
     ValidationErrorResponse,
 )
 
 router = Router()
+
+
+@router.get("/ping", response=PingResponse, tags=["Health"])
+def ping(request):
+    """
+    Liveness probe.
+
+    Returns a 200 status code without checking any dependencies, confirming
+    that the application is up and able to serve requests.
+    """
+    return {"status": "ok"}
+
+
+@router.get(
+    "/health",
+    response={200: HealthResponse, 503: ErrorResponse},
+    tags=["Health"],
+)
+def health(request):
+    """
+    Readiness probe.
+
+    Checks connectivity with the database and returns a 200 status code when it
+    is reachable, or a 503 status code when it is not.
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+    except DatabaseError:
+        return 503, {"detail": "Database connection failed"}
+
+    return 200, {"status": "ok", "database": "ok"}
 
 
 @router.get("/addresses", response=list[AddressListOut], tags=["Addresses"])

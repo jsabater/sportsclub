@@ -86,6 +86,19 @@ class AddressPatch(Schema):
     country: str | None = Field(None, max_length=100)
 
 
+class PingResponse(Schema):
+    """Simple liveness response."""
+
+    status: str
+
+
+class HealthResponse(Schema):
+    """Health check response including database connectivity."""
+
+    status: str
+    database: str
+
+
 class ErrorResponse(Schema):
     """Standard error response."""
 
